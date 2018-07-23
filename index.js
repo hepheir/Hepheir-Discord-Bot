@@ -15,11 +15,6 @@ var BOT = {
     dispatcher : undefined
 };
 
-var STRING = {
-    joinFirst : "음성 채널에 먼저 접속한 뒤에 불러주세요.",
-    hereIAm : "왔다 왔다, 내가 왔다!"
-};
-
 var COMMAND = [
     {
         names : ['노래'],
