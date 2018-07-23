@@ -227,7 +227,7 @@ var BOT = {
         for (i = 0; i < BOT.queue.length; i++) {
             source = BOT.queue[i];
 
-            str += `${i}. ${source.title} [${source.length_seconds}seconds]\n`;
+            str += `${i + 1}. ${source.title} [${source.length_seconds}seconds]\n`;
         }
         
         if (str === '') str = "재생목록에 곡이 없습니담... ('~ ')";
