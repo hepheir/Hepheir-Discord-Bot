@@ -10,29 +10,47 @@ client.on('ready', () => {
 client.login('NDcwNjU1MjExMTQ5NTkwNTI4.DjcaKg.wSbX_nq6sNnrIBU0VX19O2dVrWg');
 
 
-client.on('message', msg => {
-    if (msg.content === '야') {
-        msg.reply('왜그러세요 주인님?');
-        return;
-    }
+var BOT = {
+    voiceChannel : undefined,
+    dispatcher : undefined
+};
 
-    if  (msg.content === '이리와') {
-        if (msg.member.voiceChannel) {
-            msg.member.voiceChannel.join()
-                .then(connection => {
-                    msg.reply('왔다 왔다, 내가 왔다!');
-                })
-                .catch(console.log);
-        } else {
-            msg.reply(`음성 채널에 먼저 접속한 뒤에 불러주세요.`);
+var STRING = {
+    joinFirst : "음성 채널에 먼저 접속한 뒤에 불러주세요.",
+    hereIAm : "왔다 왔다, 내가 왔다!"
+};
+
+
+
+client.on('message', msg => {
+    if (!msg.guild || msg.author.bot) return;
+
+    if (msg.content === '나가' || msg.content === '꺼져') {
+        if (!BOT.voiceChannel) return;
+
+        if (BOT.dispatcher) {
+            BOT.dispatcher.end();
         }
-        return;
+        
+        BOT.voiceChannel.leave();
+        BOT.voiceChannel = undefined;
     }
 
     if (msg.content === '노래') {
-        msg.member.voiceChannel.join()
+        
+        if (!msg.member.voiceChannel) {
+            msg.reply(`음성 채널에 먼저 접속한 뒤에 불러주세요.`);
+        }
+
+        BOT.voiceChannel = msg.member.voiceChannel;
+        BOT.voiceChannel.join()
             .then(connection => {
-                let dispatcher = connection.playFile('./test.mp3');
-            });
+                BOT.dispatcher = connection.playFile('./test.mp3');
+                BOT.dispatcher.on('end', () => { BOT.dispatcher = undefined });
+            })
+            .catch(e => {
+                console.log(e);
+                BOT.dispatcher = undefined;
+            })
     }
 });
