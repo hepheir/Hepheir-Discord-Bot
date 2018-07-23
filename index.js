@@ -16,7 +16,7 @@ client.login('NDcwNjU1MjExMTQ5NTkwNTI4.DjcaKg.wSbX_nq6sNnrIBU0VX19O2dVrWg');
 var BOT = {
     voiceChannel : undefined,
     dispatcher : undefined,
-    volume : 1
+    volume : 100
 };
 
 var COMMAND = [
@@ -45,7 +45,7 @@ var COMMAND = [
                     
                     const stream = ytdl(url, {filter : 'audioonly' });
 
-                    BOT.dispatcher = connection.playStream(stream, { seek : 0, volume : BOT.volume / 100 });
+                    BOT.dispatcher = connection.playStream(stream, { seek : 0, volume : BOT.volume / 1000 });
                     BOT.dispatcher.on('end', () => { BOT.dispatcher = undefined });
                 })
                 .catch(e => {
@@ -79,17 +79,17 @@ var COMMAND = [
             }
 
             if (!vol) {
-                msg.channel.send('설정할 볼륨의 크기를 입력해 주세요. (1 ~ 100)\n예시) `볼륨 42`');
+                msg.channel.send('설정할 볼륨의 크기를 입력해 주세요. (1 ~ 1000)\n예시) `볼륨 42`');
                 throw 'Url is required';
             }
 
-            if (vol > 100 || vol < 0) {
+            if (vol > 1000 || vol < 0) {
                 msg.channel.send('1부터 100사이의 볼륨만 가능합니다~');
                 return;
             }
 
             BOT.volume = vol;
-            
+
             msg.channel.send(`볼륨값을 ${BOT.volume}으로 설정완료.\n다음곡부터 적용됩니다!`);
         }
     },
