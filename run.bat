@@ -1,2 +1,2 @@
 git pull origin master
-node index.js
+node src/index.js
