@@ -1,0 +1,10 @@
+{
+    "Discord" : {
+        "token" : "",
+        "clientID" : "",
+        "clientSecret" : ""
+    },
+    "Youtube" : {
+        "key" : ""
+    }
+}
