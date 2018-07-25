@@ -8,7 +8,8 @@ class Command {
 
         // Var
         this.message = undefined;
-        this.isPending = false;
+        this.requestPending = false;
+        this.requestCleaning = false;
 
         // Methods
         this.call = this.call.bind(this);
@@ -20,10 +21,26 @@ class Command {
 
     call(message) {
         this.message = message;
-        this.isPending = this.action(this) != undefined;
+        
+        let flag = this.action(this);
+
+        if (flag != undefined) {
+            this.requestPending = flag.requestPending != undefined;
+            this.requestCleaning = Array.isArray(flag.requestCleaning) ? flag.requestCleaning : undefined;
+            this.requestSend = (flag.requestSend > 0) ? flag.requestSend : 0;
+        } else {
+            this.requestPending = false;
+            this.requestCleaning = undefined;
+            this.requestSend = 0;
+        }
         return this;
     }
 
+    /**
+     * Returns if this Command class should be called by given string.
+     * @param {String} cmd 
+     * @returns {Boolean}
+     */
     isThis(cmd) {
         return this.name === cmd || this.subnames.includes(cmd);
     }

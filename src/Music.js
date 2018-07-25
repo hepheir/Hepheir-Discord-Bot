@@ -9,115 +9,89 @@ class Music {
     constructor() {
         this.VOICE_CHANNEL = undefined;
         this.DISPATCHER = undefined;
-        this.VOLUME = undefined;
+        this.VOLUME = 100;
         this.QUEUE = [];
         this.REPEAT = 0;
-        this.SEARCH_DATA = undefined;
+        this.SEARCH_DATA;
 
-        this.join = this.join.bind(this);
-        this.leave = this.leave.bind(this);
+        this.MAX_VOLUME = 1000;
+
+
+
+        this.music = this.music.bind(this);
+        this._searchFromYoutube = this._searchFromYoutube.bind(this);
+        this._searchResult = this._searchResult.bind(this);
+        this._addQueue = this._addQueue.bind(this);
         this.play = this.play.bind(this);
         this._playFromYoutube = this._playFromYoutube.bind(this);
-
-        this.search = this.search.bind(this);
-        this._searchFromYoutube = this._searchFromYoutube.bind(this);
-
+        this.join = this.join.bind(this);
+        this._join = this._join.bind(this);
+        this.leave = this.leave.bind(this);
         this.volume = this.volume.bind(this);
         this._setVolume = this._setVolume.bind(this);
+
 
         this.repeat = this.repeat.bind(this);
         this._setRepeat = this._setRepeat.bind(this);
     }
 
-    join(msg) {
-        if (!msg.member.voiceChannel) {
-            msg.channel.send(`음성 채널에 먼저 접속한 뒤에 불러주세요. ㅎㅎ`);
-            return;
-        }
-    
-        this.VOICE_CHANNEL = msg.member.voiceChannel;
+    music(Command) {
+        let cmd = getCmd(Command.message.content);
+        let arg = getArg(Command.message.content);
 
-        msg.channel.send(`왔어요 왔어, 제가 왔습니다!`);
-        return this.VOICE_CHANNEL.join();
-    }
+        // 검색 모드 ON : 번호 입력 시
+        if (this.SEARCH_DATA) {
+            if (['c', '취소', 'ㅊㅅ', 'ㅊ'].includes(arg)) {
+                this.SEARCH_DATA = undefined;
+                Command.message.channel.send(`취소 되었습니다.`);
+                return { requestSend : 1 };
+            }
 
-    leave(msg) {
-        if (!this.VOICE_CHANNEL) return;
-    
-        let repeat = this.REPEAT;
+            arg = parseInt(arg);
 
-        this.REPEAT = 0;
-        this.VOICE_CHANNEL.leave();
+            if (arg < 1 || arg > this.SEARCH_DATA.items.length) {
+                return { requestPending : true };
+            }
 
-        msg.channel.send(`지금 바로 나갑니다!`);
+            let item = this.SEARCH_DATA.items[arg - 1];
+            this.SEARCH_DATA = undefined;
 
-        this.REPEAT = repeat;
-        this.VOICE_CHANNEL = undefined;
-    }
+            this._addQueue(item);
+            Command.message.channel.send(`재생목록에 곡이 추가되었습니다.\n\`\`\`${item.snippet.title} <${item.snippet.length_seconds}seconds>\`\`\``);
 
-    play(msg, triedAgain = false) {
-        if (!this.VOICE_CHANNEL) {
-            if (triedAgain) return;
-    
-            this.join(msg)
-                .then(connection => { this.play(msg, true) });
+            if (this.QUEUE.length == 1) {
+                this.play(Command); 
+            }
+
+            return { requestSend : 1 };
         }
 
-        let arg = getArg(msg);
-
+        // URL 입력 시
         if (arg.match(/^https:\/\//)) {
             try {
-                this._playFromYoutube(url);
+                this._playFromYoutube(arg);
             } catch(e) {console.log(e)}
+            return { };
         }
-        else if (this.SEARCH_DATA) {
-            let select = Number(arg);
 
-            if (!select) {
-                return;
-            };
-
-            let videoID = this.SEARCH_DATA.items[select - 1].id.videoId;
-            console.log(JSON.stringify(this.SEARCH_DATA.items[select - 1]));
-
-            if (!videoID) {
-                return;
+        // 커맨드만 입력 시
+        if (Command.isThis(cmd)) {
+            if (cmd == arg) {
+                Command.message.channel.send(`검색할 곡 명을 입력해주세요. ~_~`);
+                return { requestPending : true, requestSend : 1 };
             }
-
-            this._playFromYoutube(videoID);
-            this.SEARCH_DATA = undefined;
         }
-        else if (arg !== getCmd(msg)){
-            this.search(msg);
-        }
-    }
 
-    _playFromYoutube(videoID = '') {
-        const stream = ytdl(videoID, { filter : 'audioonly' });
-
-        this.DISPATCHER = this.VOICE_CHANNEL.connection.playStream(stream, {
-            seek : 0,
-            volume : this.VOLUME / 1000
-        });
-
-        this.DISPATCHER.on('end', () => {
-            this.DISPATCHER = undefined;
-        });
-    }
-
-    search(msg) {
-        let query = getArg(msg);
+        // 곡 제목 입력 시
+        console.log(3);
+        let query = arg;
 
         this._searchFromYoutube(query, () => {
-            let str = '';
-            let i, item;
-
-            for (i = 0; i < this.SEARCH_DATA.items.length; i++) {
-                item = this.SEARCH_DATA.items[i];
-                str += `${i + 1}. ${item.snippet.title}\n`;
-            }
-            msg.channel.send(str);
+            this._searchResult(Command);
+            Command.message.channel.send(`[곡 번호] 로 선택해 주세요. (취소하려면 [취소])`);
         });
+        return { requestPending : true, requestSend : 2 };
+        
     }
 
     _searchFromYoutube(query = '', callback = function(){}) {
@@ -137,12 +111,123 @@ class Music {
         }).on("error", err => console.log);
     }
 
-    volume(msg) {
-        let vol = Number( getArg(msg) );
+    _searchResult(Command) {
+        if (!this.SEARCH_DATA) {
+            return {};
+        }
 
-        if (0 < vol && vol <= 1000) {
+        let str = '```';
+
+        let i, item;
+        for (i = 0; i < this.SEARCH_DATA.items.length; i++) {
+            item = this.SEARCH_DATA.items[i];
+            str += `${i + 1}. ${item.snippet.title}\n\n`;
+        }
+
+        str += '```\n';
+
+        Command.message.channel.send(str);
+        return { requestPending : true, requestSend : 1 };
+    }
+    
+    _addQueue(YoutubeSearchItem) {
+        this.QUEUE.push(YoutubeSearchItem);
+    }
+
+    play(Command) {
+        let item = this.QUEUE.shift();
+        if (!item) {
+            Command.message.channel.send(`재생목록에 곡이 없습니담... ('~ ')`);
+            return { requestSend : 1 };
+        }
+
+        if (!this.VOICE_CHANNEL) {
+            this.join(Command);
+        }
+
+        this._playFromYoutube(item.id.videoId);
+        return {};
+    }
+
+    _playFromYoutube(videoID = '') {
+        if (!this.VOICE_CHANNEL) {
+            console.log('you must be in a voice channel to play music.');
+            return;
+        }
+
+        const stream = ytdl(videoID, { filter : 'audioonly' });
+
+        if (this.DISPATCHER) {
+            this.DISPATCHER.end();
+        }
+
+        this.DISPATCHER = this.VOICE_CHANNEL.connection.playStream(stream, {
+            seek : 0,
+            volume : this.VOLUME / this.MAX_VOLUME
+        });
+
+        this.DISPATCHER.on('end', () => {
+            this.DISPATCHER = undefined;
+        });
+    }
+
+    join(Command) {
+        if (!Command.message.member.voiceChannel) {
+            Command.message.channel.send(`음성 채널에 먼저 접속한 뒤에 불러주세요. ㅎㅎ`);
+            return;
+        }
+    
+        this._join(Command.message.member.voiceChannel);
+
+        Command.message.channel.send(`왔어요 왔어, 제가 왔습니다!`);
+
+        return { requestSend : 1 };
+    }
+
+    _join(voiceChannel) {
+        this.VOICE_CHANNEL = voiceChannel;
+        this.VOICE_CHANNEL.join();
+    }
+
+    leave(Command) {
+        let msg = Command.message;
+        
+        if (!this.VOICE_CHANNEL) return;
+    
+        let repeat = this.REPEAT;
+
+        this.REPEAT = 0;
+        this.VOICE_CHANNEL.leave();
+
+        msg.channel.send(`지금 바로 나갑니다!`);
+
+        this.REPEAT = repeat;
+        this.VOICE_CHANNEL = undefined;
+
+        return { requestSend : 1 };
+    }
+
+    volume(Command) {
+        let cmd = getCmd(Command.message.content);
+        let arg = getArg(Command.message.content);
+
+        if (cmd == arg) {
+            Command.message.channel.send(`현재 볼륨값은 \`(${this.VOLUME}/${this.MAX_VOLUME})\` 입니다. _(ㅇ. < )/`);
+            return { requestSend : 1 };
+        }
+
+        let vol = Number(arg);
+
+        if (0 < vol && vol <= this.MAX_VOLUME) {
             this._setVolume(vol);
-            msg.channel.send(`볼륨값을 ${this.VOLUME}으로 설정완료.\n다음곡부터 적용됩니다! > <`);
+            Command.message.channel.send(`볼륨값을 \`(${this.VOLUME}/${this.MAX_VOLUME})\` 으로 설정완료. 다음곡부터 적용됩니다! > <`);
+            
+            return { requestSend : 1 };
+        }
+        else {
+            Command.message.channel.send(`볼륨 명령어의 사용법은 [볼륨 <숫자(1~${this.MAX_VOLUME})>]입니다! ^오^`);
+            
+            return { requestSend : 1 };
         }
     }
 
@@ -150,8 +235,15 @@ class Music {
         this.VOLUME = vol;
     }
 
-    repeat(msg) {
-        let rpt = getArg(msg);
+
+
+
+
+
+    repeat(Command) {
+        let msg = Command.message;
+
+        let rpt = getArg(msg.content);
 
         switch (rpt) {
             case 'off':
@@ -179,90 +271,21 @@ one - 한 곡 반복
     _setRepeat(repeat) {
         this.REPEAT = repeat;
     }
-    
-/*
-
-    
-    function _next(msg) {
-        switch (BOT.repeat) {
-            case 0:
-                BOT.queue.shift();
-                break;
-                
-            case 1:
-                BOT.queue.push(BOT.queue.shift())
-                break;
-    
-            case 2:
-                // No changes.
-                break;
-        }
-    
-        if (!BOT.queue[0]) {
-            _leave(msg);
-        }
-    
-        _play(msg);
-    }
-    
-    
-    // 설정
-    
-    
-    function _music(msg) {
-        let url = msg.content.split(' ')[1];
-        
-        _addQueue(url, msg.member.nickname, 0)
-            .then(() => _play(msg));
-    }
-    
-    function _addQueue(url, owner, startAt) {
-        return ytdl.getInfo(url)
-            .catch(e => console.log)
-            .then(info => {
-                BOT.queue.push({
-                    url: url,
-                    owner: owner,
-                    title: info.title,
-                    start_second: startAt,
-                    length_seconds: info.length_seconds
-                });
-            });
-    }
-    
-    function _showQueue(msg) {
-        let str = '';
-    
-        let i, source;
-        for (i = 0; i < BOT.queue.length; i++) {
-            source = BOT.queue[i];
-    
-            str += `${i + 1}. ${source.title} [${source.length_seconds}seconds]\n`;
-        }
-        
-        if (str === '') str = "재생목록에 곡이 없습니담... ('~ ')";
-        msg.channel.send(str);
-    }
-    
-    function _search(msg) {
-        https.get(`https://www.googleapis.com/youtube/v3/search?part=id&q=`)
-    }
-*/
 }
 
 function getCmd(message) {
-    if (!message.content.includes(' ')) {
-        return message.content;
+    if (!message.includes(' ')) {
+        return message;
     } else {
-        return message.content.split(' ')[0];
+        return message.split(' ')[0];
     }
 }
 
 function getArg(message) {
-    if (!message.content.includes(' ')) {
-        return message.content;
+    if (!message.includes(' ')) {
+        return message;
     } else {
-        return message.content.slice(message.content.split(' ')[0].length + 1);
+        return message.slice(message.split(' ')[0].length + 1);
     }
 }
 
