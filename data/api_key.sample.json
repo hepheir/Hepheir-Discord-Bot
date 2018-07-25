@@ -1,7 +1,7 @@
 {
     "Discord" : {
         "token" : "",
-        "clientID" : "",
+        "clientId" : "",
         "clientSecret" : ""
     },
     "Youtube" : {
