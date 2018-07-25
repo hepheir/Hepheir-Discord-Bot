@@ -26,16 +26,22 @@ class CommandHandler {
     // Registering Commands
     init() {
         this.register('노래', {
-            subnames : ['ㄴㄹ', '재생', 'ㅈㅅ'],
+            subnames : ['ㄴㄹ'],
             desc : "유튜브에서 노래를 찾아 재생합니다.",
             action : Music.music
         });
 
-        // this.register('재생목록', {
-        //     subnames : ['ㅈㅅㅁㄹ', '리스트', 'ㄹㅅㅌ'],
-        //     desc : "현재 재생목록을 보여줍니다.",
-        //     action : undefined
-        // });
+        this.register('재생', {
+            subnames : ['ㅈㅅ'],
+            desc : "재생목록의 첫 번째 노래를 재생합니다.",
+            action : Music.play
+        });
+
+        this.register('재생목록', {
+            subnames : ['ㅈㅅㅁㄹ', '리스트', 'ㄹㅅㅌ'],
+            desc : "현재 재생목록을 보여줍니다.",
+            action : Music._showQueue
+        });
 
         this.register('검색', {
             subnames: ['ㄱㅅ'],
@@ -61,11 +67,17 @@ class CommandHandler {
             action : Music.volume
         });
 
-        // this.register('다음', {
-        //     subnames: ['ㄷㅇ'],
-        //     desc: "재생목록의 다음 곡을 재생합니다.",
-        //     action : undefined
-        // });
+        this.register('반복', {
+            subnames: ['ㅂㅂ', 'ㅃ'],
+            desc: "반복 모드를 정합니다! : <off(0): 반복 없음 | on(1): 목록 반복 | one(2): 한 곡 반복>",
+            action : Music.repeat
+        });
+
+        this.register('다음', {
+            subnames: ['ㄷㅇ', 'skip'],
+            desc: "재생목록의 다음 곡을 재생합니다.",
+            action : Music.skip
+        });
 
         this.register('군인', {
             subnames: [

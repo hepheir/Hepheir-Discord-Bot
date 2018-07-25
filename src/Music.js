@@ -11,10 +11,11 @@ class Music {
         this.DISPATCHER = undefined;
         this.VOLUME = 100;
         this.QUEUE = [];
-        this.REPEAT = 0;
+        this.REPEAT = 0; // 0: 반복 없음, 1: 목록 반복, 2: 한 곡 반복
         this.SEARCH_DATA;
 
         this.MAX_VOLUME = 1000;
+        this.NOW_PLAYING = undefined;
 
 
 
@@ -29,6 +30,8 @@ class Music {
         this.leave = this.leave.bind(this);
         this.volume = this.volume.bind(this);
         this._setVolume = this._setVolume.bind(this);
+        this._showQueue = this._showQueue.bind(this);
+        this.skip = this.skip.bind(this);
 
 
         this.repeat = this.repeat.bind(this);
@@ -49,7 +52,7 @@ class Music {
 
             arg = parseInt(arg);
 
-            if (arg < 1 || arg > this.SEARCH_DATA.items.length) {
+            if ( !( 1 <= arg && arg <= this.SEARCH_DATA.items.length) ) {
                 return { requestPending : true };
             }
 
@@ -59,7 +62,7 @@ class Music {
             this._addQueue(item);
             Command.message.channel.send(`재생목록에 곡이 추가되었습니다.\n\`\`\`${item.snippet.title}\`\`\``);
 
-            if (this.QUEUE.length == 1) {
+            if (!this.NOW_PLAYING && this.QUEUE.length == 1) {
                 this.play(Command); 
             }
 
@@ -135,17 +138,45 @@ class Music {
 
     play(Command) {
         let item = this.QUEUE.shift();
+
         if (!item) {
             Command.message.channel.send(`재생목록에 곡이 없습니담... ('~ ')`);
             return { requestSend : 1 };
         }
-
+    
+        // 음성 채널 확인
         if (!this.VOICE_CHANNEL) {
             this.join(Command);
         }
 
         this._playFromYoutube(item.id.videoId);
-        return {};
+        this.NOW_PLAYING = item;
+
+        Command.message.channel.send(`현재 재생중...\n\`\`\`${this.NOW_PLAYING.snippet.title}\`\`\``);
+
+        this.DISPATCHER.on('end', () => {
+            if (this.REPEAT == 0) {
+                this.NOW_PLAYING = undefined;
+                this.DISPATCHER = undefined;
+                return;
+            }
+        
+            // 목록 전체 반복
+            if (this.REPEAT == 1) {
+                this.QUEUE.push(this.NOW_PLAYING);
+            }
+            // 한 곡 반복
+            else if (this.REPEAT == 2) {
+                this.QUEUE.unshift(this.NOW_PLAYING);
+            }
+
+            this.NOW_PLAYING = undefined;
+
+            if (this.VOICE_CHANNEL) {
+                this.play(Command);
+            }
+        })
+        return { requestSend : 1 };
     }
 
     _playFromYoutube(videoID = '') {
@@ -163,10 +194,6 @@ class Music {
         this.DISPATCHER = this.VOICE_CHANNEL.connection.playStream(stream, {
             seek : 0,
             volume : this.VOLUME / this.MAX_VOLUME
-        });
-
-        this.DISPATCHER.on('end', () => {
-            this.DISPATCHER = undefined;
         });
     }
 
@@ -234,41 +261,81 @@ class Music {
         this.VOLUME = vol;
     }
 
+    _showQueue(Command) {
+        let str = '';
 
-
-
-
-
-    repeat(Command) {
-        let msg = Command.message;
-
-        let rpt = getArg(msg.content);
-
-        switch (rpt) {
-            case 'off':
-                msg.channel.send(`반복 없음.`);
-                break;
-            case 'on':
-                msg.channel.send(`목록 반복.`);
-                break;
-            case 'one':
-                msg.channel.send(`한 곡 반복.`);
-                break;
-        
-            default:
-                msg.channel.send(`다음 값 중에서 하나만 입력 가능합니다!
-off - 반복 없음
-on  - 목록 전체 반복
-one - 한 곡 반복
-`);
-                return;
+        if (this.NOW_PLAYING) {
+            str += `현재 재생중...\n\`\`\`${this.NOW_PLAYING.snippet.title}\`\`\`\n`;
         }
 
-        this._setRepeat(rpt);
+        str += '현재 재생목록\n```';
+
+        if (this.QUEUE.length == 0) {
+            str += `재생목록에 곡이 없습니담... ('~ ')`;
+        }
+        else {
+            for (let i = 0; i < this.QUEUE.length; i++) {
+                str += `${i + 1}. ${this.QUEUE[i].snippet.title}\n\n`;
+            }    
+        }
+
+        str += '```\n';
+
+        Command.message.channel.send(str);
+        return { requestSend : 1 };
+    }
+
+    repeat(Command) {
+        let cmd = getCmd(Command.message.content);
+        let arg = getArg(Command.message.content);
+
+        let opt;
+
+        if (cmd == arg) {
+            if (this.REPEAT == 0) {
+                opt = '반복 없음';
+            } else if (this.REPEAT == 1) {
+                opt = '전체 반복';
+            } else if (this.REPEAT == 2) {
+                opt = '한 곡 반복';
+            }
+
+            Command.message.channel.send(`현재 반복 모드는 \`[${opt}]\` 입니다. ㅇㅅㅇ`);
+            return { requestSend : 1 };
+        }
+
+        let str = `\`[`;
+
+        if (['0', 'off', '끄기', 'ㄲㄱ', '없음', 'ㅇㅇ'].includes(arg)) {
+            str += `반복 없음`;
+            opt = 0;
+        } else if (['1', 'on', 'all', '전체', 'ㅈㅊ', '목록', 'ㅁㄹ'].includes(arg)) {
+            str += `목록 반복`;
+            opt = 1;
+        } else if (['2', 'one', '한곡', '한 곡', 'ㅎㄱ', 'ㅎ ㄱ', '하나', 'ㅎㄴ'].includes(arg)) {
+            str += `한 곡 반복`;
+            opt = 2;
+        } else {
+            Command.message.channel.send(`다음 값 중에서 하나만 입력 가능합니다!\n\`\`\`끄기 (0, off) : 반복 없음\n전체 (1, on, all) : 전체 반복\n하나 (2, one) : 한 곡 반복\`\`\`\n사용법 : \`[반복 <모드>]\``);
+            return { requestPending : true, requestSend : 1 };
+        }
+
+        str += `]\` 으로 설정되었습니다.`;
+
+        this._setRepeat(opt);
+        Command.message.channel.send(str);
+
+        return { requestSend : 1 };
     }
 
     _setRepeat(repeat) {
         this.REPEAT = repeat;
+    }
+
+    skip(Command) {
+        if (this.NOW_PLAYING) {
+            this.DISPATCHER.end();
+        }
     }
 }
 
