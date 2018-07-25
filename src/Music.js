@@ -57,7 +57,7 @@ class Music {
             this.SEARCH_DATA = undefined;
 
             this._addQueue(item);
-            Command.message.channel.send(`재생목록에 곡이 추가되었습니다.\n\`\`\`${item.snippet.title} <${item.snippet.length_seconds}seconds>\`\`\``);
+            Command.message.channel.send(`재생목록에 곡이 추가되었습니다.\n\`\`\`${item.snippet.title}\`\`\``);
 
             if (this.QUEUE.length == 1) {
                 this.play(Command); 
@@ -83,7 +83,6 @@ class Music {
         }
 
         // 곡 제목 입력 시
-        console.log(3);
         let query = arg;
 
         this._searchFromYoutube(query, () => {
