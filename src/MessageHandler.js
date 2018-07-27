@@ -1,8 +1,5 @@
 const CommandHandler = require('./CommandHandler.js');
 
-// @public
-var Inquiry = undefined;
-
 class MessageHandler extends CommandHandler {
     constructor(Client) {
         super({ Client : Client });
