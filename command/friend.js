@@ -161,7 +161,11 @@ class R extends Register {
                 
                 if (this.rare(30)) {
                     msg.channel.send('^ *난쟁이 밥오...*');
-                };
+                } else if (this.rare(30)) {
+                    msg.channel.send('*진우 밥오...*');
+                } else if (this.rare(40)) {
+                    msg.channel.send('*...너 4이코패스냐?*');
+                }
             }
         }, true, true);
          
