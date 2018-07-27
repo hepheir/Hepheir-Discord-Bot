@@ -4,6 +4,26 @@ class R extends Register {
     constructor() {
         super();
 
+        this.register('김동주', {
+            subnames: ['동주', 'Hepheir'],
+            desc : undefined,
+            action: Command => {
+                let msg = Command.CommandHandler.history.list[0];
+
+                if (this.rare(5)) {
+                    msg.channel.send('*첨성대학교*');
+                } else if (this.rare(5)) {
+                    msg.channel.send('*https://github.com/Hepheir/Hepheir-Bot*');
+                } else if (this.rare(20)) {
+                    msg.channel.send('*신한 110-355-007102*');
+                } else if (this.rare(20)) {
+                    msg.channel.send('*010-2463-1852*');
+                } else if (this.rare(20)) {
+                    msg.channel.send('*석장동 840-2 201호*');
+                }               
+            }
+        }, true, true);
+
         this.register('군인', {
             subnames: [
                 '정태완', '태완',
@@ -29,16 +49,18 @@ class R extends Register {
         
                        if (this.rare(5)) {
                     msg.channel.send('*머머리병사 김숩인, 충성충성!*');
-                } else if (this.rare(20)) {
+                } else if (this.rare(15)) {
                     msg.channel.send('*지금쯤 열심히 현실배그 하고 있을 김숩..* ㅠㅠ');
-                } else if (this.rare(25)) {
+                } else if (this.rare(20)) {
                     msg.channel.send('*김숩.. 그는 지금 빡빡이..* ㅠㅠ');
-                } else if (this.rare(30)) {
+                } else if (this.rare(25)) {
                     msg.channel.send('*운전병 김숩이는 잘 지내고 있을까?*');
-                } else if (this.rare(35)) {
+                } else if (this.rare(30)) {
                     msg.channel.send('*외로운 숩인이 여자친구 해주실 분 구합니다!* ㅠㅠ');
-                } else if (this.rare(40)) {
+                } else if (this.rare(35)) {
                     msg.channel.send('*복오싶오 숩인아...* ㅠㅠ');
+                } else if (this.rare(45)) {
+                    msg.channel.send(`*Xiaho Zin DDang Can't Win*`);
                 } else if (this.rare(10)) {
                     msg.channel.send('*이건 진짜 보기 힘든 메세지. 매우 낮은 확률의 메세지... 그치만 숩인이가 복오싶오..*');
                 }

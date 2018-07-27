@@ -21,6 +21,10 @@ class MessageHandler extends CommandHandler {
 
                 let str = ''
 
+                str += `**Bojeong Univ.**`;
+                str += ` [\`친구들의 이름\`]\n`;
+                str += `\`\`\`일정한 확률로 문구가 출력되기도 합니다.\`\`\`\n`;
+
                 Ch.action.list.forEach(Command => {
                     if (Command.desc === undefined)
                         return;
