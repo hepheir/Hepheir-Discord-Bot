@@ -54,7 +54,7 @@ class R extends Register {
                 } else if (this.rare(20)) {
                     msg.channel.send('*"오늘 월식있다는데 보고 잘거냐?",\n\t\t"개기월식은 자주 있는 일이야" ~빛창현*');
                 } else if (this.rare(25)) {
-                    msg.channel.send('*"하지만 화성 친구도 옆에 있다는데",\n\t\t"그 친구는 매일 있어" ~빛창현"*');
+                    msg.channel.send('*"하지만 화성 친구도 옆에 있다는데",\n\t\t"그 친구는 매일 있어" ~빛창현*');
                 } else if (this.rare(40)) {
                     msg.channel.send('*곧 군대로 떠나고 없을 사람입니다.* ㅠㅠ');
                 }
