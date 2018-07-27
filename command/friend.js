@@ -103,6 +103,18 @@ class R extends Register {
             }
         }, true, true);
         
+        this.register('이수빈', {
+            subnames: ['이숩'],
+            desc : undefined,
+            action: Command => {
+                let msg = Command.CommandHandler.history.list[0];
+        
+                       if (this.rare(40)) {
+                    msg.channel.send('*석...이...*');
+                }
+            }
+        }, true, true);
+        
         this.register('김주은', {
             subnames: [ '주은', '군만두', 'gunmandu', '아이스개', '대박삼건' ],
             desc : undefined,
