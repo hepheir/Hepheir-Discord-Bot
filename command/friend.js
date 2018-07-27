@@ -122,8 +122,6 @@ class R extends Register {
         
         this.register('공익', {
             subnames: [
-                '이민규', '민규', '좆규', '작규',
-                // '김동주', '동주',
                 '오성준', '성준', '엉준',
                 '오택현', '택현', '파섹현',
                 '조제희', '제희',
@@ -165,6 +163,22 @@ class R extends Register {
                     msg.channel.send('*진우 밥오...*');
                 } else if (this.rare(40)) {
                     msg.channel.send('*...너 4이코패스냐?*');
+                }
+            }
+        }, true, true);
+        
+        this.register('이민규', {
+            subnames: ['민규', '좆규', '작규'],
+            desc : undefined,
+            action: Command => {
+                let msg = Command.CommandHandler.history.list[0];
+                
+                if (this.rare(3)) {
+                    msg.channel.send('*전화해줘~*');
+                } else if (this.rare(15)) {
+                    msg.channel.send('*히히*');
+                } else if (this.rare(20)) {
+                    msg.channel.send('*ㅋㅋ*');
                 }
             }
         }, true, true);
