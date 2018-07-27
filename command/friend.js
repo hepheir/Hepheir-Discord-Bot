@@ -41,6 +41,38 @@ class R extends Register {
             }
         }, true, true);
         
+        this.register('남창현', {
+            subnames: [ '창현', '남창' ],
+            desc : undefined,
+            action: Command => {
+                let msg = Command.CommandHandler.history.list[0];
+        
+                       if (this.rare(10)) {
+                    msg.channel.send('*킹고 킹고 에스카라 킹고*');
+                } else if (this.rare(15)) {
+                    msg.channel.send('*선글라스가 잘 어울리는 그는...*');
+                } else if (this.rare(25)) {
+                    msg.channel.send('*곧 군대로 떠나고 없을 사람입니다.* ㅠㅠ');
+                }
+            }
+        }, true, true);
+        
+        this.register('정준환', {
+            subnames: [ '준환', '17기계', 'fg'],
+            desc : undefined,
+            action: Command => {
+                let msg = Command.CommandHandler.history.list[0];
+        
+                       if (this.rare(10)) {
+                    msg.channel.send('*킹고 킹고 에스카라 킹고*');
+                } else if (this.rare(15)) {
+                    msg.channel.send('*Freshman Guide*');
+                } else if (this.rare(25)) {
+                    msg.channel.send('*17 기계 정준환*');
+                }
+            }
+        }, true, true);
+        
         this.register('김수빈', {
             subnames: [ '수빈', '김숩', '숩', '숩인', '숩인이' ],
             desc : undefined,
