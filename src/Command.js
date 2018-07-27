@@ -1,65 +1,76 @@
 class Command {
-    constructor(name) {
+    constructor(name, action) {
         // Init
         this.name = name;
         this.subnames = [];
-        this.action = function() {};
         this.desc = '';
 
+        if (typeof action !== 'function') {
+            throw `Error, ${action} is not a function`;
+        }
+
+        this.action = function() {};
+
+
+        // Condition for this Command to be called : 호출 조건
+        this.condition = {
+            this      : this, // to fix `this`
+            onCommand : true,
+            onChat    : false,
+            onMention : false,
+            onBot     : false,
+            check     : this._checkCondition
+        };
+
         // Var
-        this.message = undefined;
-        this.requestPending = false;
-        this.requestCleaning = false;
+        this.CommandHandler = undefined;
 
-        // Methods
-        this.call = this.call.bind(this);
-        this.isThis = this.isThis.bind(this);
-        this.setAction = this.setAction.bind(this);
-        this.addSubname = this.addSubname.bind(this);
-        this.removeSubname = this.removeSubname.bind(this);
+        // Bindings
+            this.call = this.call.bind(this);
+            this._checkCondition = this._checkCondition.bind(this);
     }
 
-    call(message) {
-        this.message = message;
+    call(CommandHandler) {
+        this.CommandHandler = CommandHandler;
+
+        return this.action(this);
+    }
+
+    // Helpers
+
+    _checkCondition(MessageObject) {
+        let that = this.this;
         
-        let flag = this.action(this);
 
-        if (flag != undefined) {
-            this.requestPending = flag.requestPending != undefined;
-            this.requestCleaning = Array.isArray(flag.requestCleaning) ? flag.requestCleaning : undefined;
-            this.requestSend = (flag.requestSend > 0) ? flag.requestSend : 0;
-        } else {
-            this.requestPending = false;
-            this.requestCleaning = undefined;
-            this.requestSend = 0;
+        if (!that.condition.onBot) {
+            if (MessageObject.author.bot)
+                return false;
         }
-        return this;
-    }
 
-    /**
-     * Returns if this Command class should be called by given string.
-     * @param {String} cmd 
-     * @returns {Boolean}
-     */
-    isThis(cmd) {
-        return this.name === cmd || this.subnames.includes(cmd);
-    }
+        let cmd = MessageObject.content.includes(' ') ?
+                MessageObject.content.split(' ')[0] :
+                MessageObject.content;
 
-    setAction(call) {
-        this.action = typeof call === 'function' ? call : function (cmd) { cmd.message.channel.send(cmd.desc) };
-        return this;
-    }
-
-    addSubname(name) {
-        if (Array.isArray(name)) {
-            this.subnames = this.subnames.concat(name);
-        } else {
-            this.subnames.push(name);
+        if (that.condition.onChat) {
+            if (MessageObject.content.includes(that.name)) {
+                return true;
+            }
+            
+            if (that.subnames.find(subname => MessageObject.content.includes(subname))) {
+                return true;
+            }
         }
-    }
 
-    removeSubname(name) {
-        this.subnames = this.subnames.filter(n => n !== name);
+        if (that.condition.onMention) {
+            // To Do
+        }
+
+        if (that.condition.onCommand) {
+            if (that.name == cmd || that.subnames.includes(cmd))
+                return true;
+        }
+
+        return false;
     }
 }
 

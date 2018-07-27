@@ -1,13 +1,12 @@
 'use strict';
 
-const fs = require('fs');
-
 
 // DISCORD BOT
 
-const API = JSON.parse( fs.readFileSync("data/api_key.json") );
+const fs = require('fs');
+const Discord = require('discord.js');
 
-const Discord = require("discord.js");
+const API = JSON.parse( fs.readFileSync("data/api_key.json") );
 const client = new Discord.Client();
 
 client.on('ready', () => {
@@ -23,7 +22,20 @@ please enter your token @ data/api_key.json
 else client.login(API.Discord.token);
 
 
-const CommandHandler = require('./CommandHandler.js');
-const CmdHdr = new CommandHandler(client);
+// MAIN
 
-client.on('message', CmdHdr.onMessage);
+const MessageHandler = require('./MessageHandler.js');
+
+const messageHandler = new MessageHandler(client);
+
+client.once('message', messageHandler.onMessage);
+
+
+
+/**
+ * Client.user.setStatus()
+ * : PresenceStatus
+ * - online : 초록. 대기중
+ * - idle   : 노랑. 명령 실행중
+ * - dnd    : 빨강. 입력을 기다리는 중
+ */
