@@ -7,7 +7,11 @@ class MessageHandler extends CommandHandler {
     constructor(Client) {
         super({ Client : Client });
 
-        this.action.list = this.action.list.concat(require('../command/friend.js'));
+        const commandPackages = ['friend', 'music'];
+
+        commandPackages.forEach(pack => {
+            this.action.list = this.action.list.concat(require(`../command/${pack}.js`));
+        });
 
         this.register('도움말', {
             subnames: ['헬프', '헲', 'help', 'ㄷㅇㅁ', '도움', '?'],
