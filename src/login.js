@@ -25,11 +25,7 @@ else client.login(API.Discord.token);
 // MAIN
 
 const MessageHandler = require('./MessageHandler.js');
-
-const messageHandler = new MessageHandler(client);
-
-client.once('message', messageHandler.onMessage);
-
+new MessageHandler(client);
 
 
 /**
