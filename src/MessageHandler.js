@@ -1,63 +1,83 @@
-const CommandHandler = require('./CommandHandler.js');
+const events = require('events');
 
-class MessageHandler extends CommandHandler {
-    constructor(Client) {
-        super({ Client : Client });
+class MessageHandler {
+    constructor(client) {
+        this.client = client;
+        this.eventEmitter = new events.EventEmitter();
 
-        const commandPackages = ['friend', 'music'];
+        this.commandList = [];
+        this.history = {
+            list    : [],
+            add     : this._addHistory,
+            clear   : this._clearHistory
+        };
 
-        commandPackages.forEach(pack => {
-            this.action.list = this.action.list.concat(require(`../command/${pack}.js`));
-        });
-
-        this.register('도움말', {
-            subnames: ['헬프', '헲', 'help', 'ㄷㅇㅁ', '도움', '?'],
-            desc: "도움말을 보여줍니다.",
-            action : Command => {
-                let Ch = Command.CommandHandler;
-
-                let str = ''
-
-                str += `**Bojeong Univ.**`;
-                str += ` [\`친구들의 이름\`]\n`;
-                str += `\`\`\`일정한 확률로 문구가 출력되기도 합니다.\`\`\`\n`;
-
-                Ch.action.list.forEach(Command => {
-                    if (Command.desc === undefined)
-                        return;
-
-                    str += `**${Command.name}**`;
-                    str += ` [\`${Command.subnames.join(', ')}\`]\n`;
-                    str += `\`\`\`${Command.desc}\`\`\`\n`;
-                })
-
-                str += `\n*\`P.S. 아무거나 입력하면 사라집니다. (<도움말> 명령어를 입력하면 고정)\`*`;
-
-                Ch.history.list[0].channel.send(str)
-                    .then(MessageObject => Ch.history.add(MessageObject))
-                    .then(() => {
-                        Ch.Client.once('message', MessageObject => {
-                            if (!Command.condition.check(MessageObject)) {
-                                Ch.history.list[1].delete();
-                            }
-                        });
-                    });  
-            }
-        }, true, false);
+        this.proceeding = false;
 
         // Binding
-            this.startMessage = this.startMessage.bind(this);
+        this._main_MessageListener  = this._main_MessageListener.bind(this);
+        this._assignCommandPackages = this._assignCommandPackages.bind(this);
+        this._onCommandStart = this._onCommandStart.bind(this);
+        this._onCommandEnd   = this._onCommandEnd.bind(this);
+        this._findCommand    = this._findCommand.bind(this);
+
+        // Init
+        this._assignCommandPackages('help', 'friend');
+
         // Listener
-        this.Client.on('message', this.startMessage);
-    }    
-
-    startMessage(MessageObject) {
-        if (this.Client.user.presence.status != 'online')
-            return;
-
-        this.onMessage(MessageObject);
-
+        this.client.on('message', this._main_MessageListener);
+        this.eventEmitter.on('commandStart', this._onCommandStart);
+        this.eventEmitter.on('commandEnd',   this._onCommandEnd);
     }
+
+    _assignCommandPackages() {
+        Array.from(arguments).forEach(packname => {
+            let cmdPackage = require(`../cmd/${packname}.js`);
+
+            cmdPackage.forEach(c => {
+                this.eventEmitter.on(`command:${c.name}`, c.action);
+            });
+            this.commandList = this.commandList.concat(cmdPackage);
+        });
+    }
+
+    _main_MessageListener(Message) {
+        console.log('onMessage');
+        this.history.add(Message);
+        
+        let Command = this._findCommand(Message);
+        if (Command && !this.proceeding) {
+            this.eventEmitter.emit(`command:${Command.name}`, this);
+        }
+    }
+
+    // Command Handling
+
+    _findCommand(Message) {
+        return this.commandList.find(item => item.isThis(Message));
+    }
+
+    _onCommandStart() {
+        console.log('Command Started!');
+        this.client.user.setStatus('idle');
+        this.proceeding = true;
+    }
+
+    _onCommandEnd() {
+        console.log('Command Ended!');
+        this.client.user.setStatus('online');
+        this.proceeding = false;
+    }
+
+    // History Handling
+    _addHistory(Message) {
+        this.list.unshift(Message);
+
+        if (this.list.length > 10)
+            this.list.pop();
+    }
+    
+    _clearHistory() { this.list = []; }
 }
 
 module.exports = MessageHandler;
