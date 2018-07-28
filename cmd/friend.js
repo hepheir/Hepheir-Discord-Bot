@@ -6,10 +6,6 @@ function randomInt(MAX_VALUE) {
     return Math.floor( Math.random() * (MAX_VALUE + 1) );
 }
 
-function getCommandByName(name) {
-    return LIST.find(C => C.name === name);
-}
-
 LIST = [
 /* Commands
 ,
