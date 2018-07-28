@@ -20,8 +20,8 @@ LIST = [
             onChat    : true,
             onBot     : false
         }
-    }, Command => {
-        function send(text) { return Command.history.list[0].channel.send(text); }
+    }, Handler => {
+        function send(text) { return Handler.history.list[0].channel.send(text); }
 
         let R = randomInt(100);
 
@@ -39,16 +39,17 @@ LIST = [
             onChat    : true,
             onBot     : false
         }
-    }, Command => {
-        function send(text) { return Command.history.list[0].channel.send(text); }
+    }, Handler => {
+        function send(text) { return Handler.history.list[0].channel.send(text); }
 
         let R = randomInt(100);
 
-             if (R <  5) send(`*첨성대학교*`);
-        else if (R < 20) send(`*https://github.com/Hepheir/Hepheir-Bot*`);
-        else if (R < 35) send(`*신한 110-355-007102*`);
-        else if (R < 50) send(`*010-2463-1852*`);
-        else if (R < 65) send(`*석장동 840-2 201호*`);
+             if (R <  5) send(`*왜 불러?*`);
+        else if (R < 20) send(`*찐땅 봇 깃허브 : https://github.com/Hepheir/Hepheir-Bot*`);
+        else if (R < 35) send(`*와이?*`);
+        else if (R < 55) send(`*요!*`);
+        else if (R < 65) send(`*ㅎㅇ!*`);
+        else if (R < 75) send(`*왜?*`);
     })
 ,
     new Command('김수빈', {
@@ -58,8 +59,8 @@ LIST = [
             onChat    : true,
             onBot     : false
         }
-    }, Command => {
-        function send(text) { return Command.history.list[0].channel.send(text); }
+    }, Handler => {
+        function send(text) { return Handler.history.list[0].channel.send(text); }
 
         let R = randomInt(100);
 
@@ -79,8 +80,8 @@ LIST = [
             onChat    : true,
             onBot     : false
         }
-    }, Command => {
-        function send(text) { return Command.history.list[0].channel.send(text); }
+    }, Handler => {
+        function send(text) { return Handler.history.list[0].channel.send(text); }
 
         let R = randomInt(100);
 
@@ -98,8 +99,8 @@ LIST = [
             onChat    : true,
             onBot     : false
         }
-    }, Command => {
-        function send(text) { return Command.history.list[0].channel.send(text); }
+    }, Handler => {
+        function send(text) { return Handler.history.list[0].channel.send(text); }
 
         let R = randomInt(100);
 
@@ -113,8 +114,8 @@ LIST = [
             onChat    : true,
             onBot     : false
         }
-    }, Command => {
-        function send(text) { return Command.history.list[0].channel.send(text); }
+    }, Handler => {
+        function send(text) { return Handler.history.list[0].channel.send(text); }
 
         let R = randomInt(100);
 
@@ -130,8 +131,8 @@ LIST = [
             onChat    : true,
             onBot     : false
         }
-    }, Command => {
-        function send(text) { return Command.history.list[0].channel.send(text); }
+    }, Handler => {
+        function send(text) { return Handler.history.list[0].channel.send(text); }
 
         let R = randomInt(100);
 
@@ -147,15 +148,24 @@ LIST = [
             onChat    : true,
             onBot     : false
         }
-    }, Command => {
-        function send(text) { return Command.history.list[0].channel.send(text); }
+    }, Handler => {
+        function send(text) { return Handler.history.list[0].channel.send(text); }
 
         let R = randomInt(100);
 
              if (R < 20) send(`*자칭 19학번 의대생*`);
-        else if (R < 30) send(`*그는 좋...지많은 않은 삼수생이었습니다.*`);
-        else if (R < 40) send(`*명 사...ㅁ수의 길...*`);
-        else if (R < 50) send(`*팡운대*`);
+        else if (R < 30) send(`*명 사...ㅁ수의 길...*`);
+        else if (R < 40) send(`*팡운대*`);
+        else if (R < 55) {
+            Handler.eventEmitter.emit('commandStart');
+
+            send('음...').then(msg1 => setTimeout(() => {
+                msg1.edit(`*그는 좋*`).then(msg2 => setTimeout(() => {
+                    msg2.edit(`*그는 좋...지많은 않은 삼수생이었습니다.*`);
+                    Handler.eventEmitter.emit('commandEnd');
+                }, 1000));
+            }, 2000));
+        }
     })
 ,
     new Command('이동재', {
@@ -165,8 +175,8 @@ LIST = [
             onChat    : true,
             onBot     : false
         }
-    }, Command => {
-        function send(text) { return Command.history.list[0].channel.send(text); }
+    }, Handler => {
+        function send(text) { return Handler.history.list[0].channel.send(text); }
 
         let R = randomInt(100);
 
@@ -182,8 +192,8 @@ LIST = [
             onChat    : true,
             onBot     : false
         }
-    }, Command => {
-        function send(text) { return Command.history.list[0].channel.send(text); }
+    }, Handler => {
+        function send(text) { return Handler.history.list[0].channel.send(text); }
 
         let R = randomInt(100);
 
@@ -203,8 +213,8 @@ LIST = [
             onChat    : true,
             onBot     : false
         }
-    }, Command => {
-        function send(text) { return Command.history.list[0].channel.send(text); }
+    }, Handler => {
+        function send(text) { return Handler.history.list[0].channel.send(text); }
 
         let R = randomInt(100);
 
@@ -222,8 +232,8 @@ LIST = [
             onChat    : true,
             onBot     : false
         }
-    }, Command => {
-        function send(text) { return Command.history.list[0].channel.send(text); }
+    }, Handler => {
+        function send(text) { return Handler.history.list[0].channel.send(text); }
 
         let R = randomInt(1000000);
 
@@ -244,8 +254,8 @@ LIST = [
             onChat    : true,
             onBot     : false
         }
-    }, Command => {
-        function send(text) { return Command.history.list[0].channel.send(text); }
+    }, Handler => {
+        function send(text) { return Handler.history.list[0].channel.send(text); }
 
         let R = randomInt(100);
 
@@ -265,8 +275,8 @@ LIST = [
             onChat    : true,
             onBot     : false
         }
-    }, Command => {
-        function send(text) { return Command.history.list[0].channel.send(text); }
+    }, Handler => {
+        function send(text) { return Handler.history.list[0].channel.send(text); }
 
         let R = randomInt(100);
 
