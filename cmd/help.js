@@ -30,10 +30,12 @@ new Command('도움말', {
             onChat    : false,
             onBot     : false
         }
-}, Command => {
+}, Handler => {
     function send(text) {
-        return Command.history.list[0].channel.send(text);
+        return Handler.history.list[0].channel.send(text);
     }
+
+    Handler.eventEmitter.emit('commandStart');
 
     let content = '';
 
@@ -41,25 +43,22 @@ new Command('도움말', {
     content += ` [\`친구들의 이름\`]\n`;
     content += `\`\`\`일정한 확률로 문구가 출력되기도 합니다.\`\`\`\n`;
 
-    Command.COMMAND_HANDLER.COMMAND_LIST.forEach(command => {
-        if (command.desc === undefined) return;
+    Handler.commandList.forEach(cmd => {
+        if (cmd.option.desc === undefined) return;
 
-        content += `**${command.name}**`;
-        content += ` [\`${command.option.subnames.join(', ')}\`]\n`;
-        content += `\`\`\`${command.option.desc}\`\`\`\n`;
+        content += `**${cmd.name}**`;
+        content += ` [\`${cmd.option.subnames.join(', ')}\`]\n`;
+        content += `\`\`\`${cmd.option.desc}\`\`\`\n`;
     })
 
-    content += `\n*\`P.S. 아무거나 입력하면 사라집니다. (<도움말> 명령어를 입력하면 고정)\`*`;
+    content += `\n*\`P.S. 아무거나 입력하면 사라집니다.\`*`;
 
-    send(content)
-    .then(helpMessage => {
-        Command.client.once('message', userMessage => {
-            if (!Command.isThis(userMessage)) {
-                helpMessage.delete();
-                this.onMessage(userMessage);
-            }
+    send(content).then(helpMessage => {
+        Handler.client.once('message', userMessage => {
+            helpMessage.delete();
+            Handler.eventEmitter.emit('commandEnd');
         })
-});
+    });
 })
 ];
 
