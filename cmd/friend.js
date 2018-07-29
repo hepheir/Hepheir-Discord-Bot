@@ -6,7 +6,7 @@ function randomInt(MAX_VALUE) {
     return Math.floor( Math.random() * (MAX_VALUE + 1) );
 }
 
-LIST = [
+const LIST = [
 /* Commands
 ,
     new Command('', {
@@ -179,9 +179,8 @@ LIST = [
         else if (R < 20) Handler.send(`*석...2...*`);
         else if (R < 30) Handler.send(`*석...E...*`);
         else if (R < 40) Handler.send(`*석...Yee...*`);
-        else if (R < 50) Handler.send(`*석...0ㅣ...*`);
-        else if (R < 60) Handler.send(`*석...ㅇi...*`);
-        else if (R < 70) Handler.send(`*서기모찌!*`);
+        else if (R < 50) Handler.send(`*석...e...*`);
+        else if (R < 60) Handler.send(`*서기모찌!*`);
     })
 ,
     new Command('정준환', {
@@ -212,8 +211,12 @@ LIST = [
         let R = randomInt(1000000);
 
         if (R < 1) Handler.send(`*좋냐고? 당연하지! ㅠㅠ*`).then(Message => {
+            console.log(`...OMG`);
             setTimeout( () => Message.delete() );
         }, 2000);
+        else {
+            console.log(`...But failed`);
+        }
     })
 ,
     new Command('군대', {
