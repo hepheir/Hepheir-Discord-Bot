@@ -35,7 +35,7 @@ new Command('도움말', {
         return Handler.history.list[0].channel.send(text);
     }
 
-    Handler.startCommand();
+    Handler.startCommand('도움말 열기');
 
     let content = '';
 
@@ -56,7 +56,7 @@ new Command('도움말', {
     send(content).then(helpMessage => {
         Handler.client.once('message', userMessage => {
             helpMessage.delete();
-            Handler.endCommand;
+            Handler.endCommand('도움말 종료');
         })
     });
 })
