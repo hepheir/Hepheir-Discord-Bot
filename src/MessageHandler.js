@@ -30,6 +30,14 @@ class MessageHandler {
         this.eventEmitter.on('commandEnd',   this._onCommandEnd);
     }
 
+    // Methods
+    send(text) {
+        if (!this.history.list[0]) throw `No history`;
+
+        return this.history.list[0].channel.send(text);
+    }
+
+    // Helpers
     _assignCommandPackages() {
         Array.from(arguments).forEach(packname => {
             let cmdPackage = require(`../cmd/${packname}.js`);
