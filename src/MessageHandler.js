@@ -1,63 +1,123 @@
-const CommandHandler = require('./CommandHandler.js');
+const events = require('events');
 
-class MessageHandler extends CommandHandler {
-    constructor(Client) {
-        super({ Client : Client });
+class MessageHandler {
+    constructor(client) {
+        this.client = client;
+        this.eventEmitter = new events.EventEmitter();
 
-        const commandPackages = ['friend', 'music'];
+        this.commandList = [];
+        this.history = {
+            list    : [],
+            add     : this._addHistory,
+            clear   : this._clearHistory
+        };
 
-        commandPackages.forEach(pack => {
-            this.action.list = this.action.list.concat(require(`../command/${pack}.js`));
-        });
-
-        this.register('도움말', {
-            subnames: ['헬프', '헲', 'help', 'ㄷㅇㅁ', '도움', '?'],
-            desc: "도움말을 보여줍니다.",
-            action : Command => {
-                let Ch = Command.CommandHandler;
-
-                let str = ''
-
-                str += `**Bojeong Univ.**`;
-                str += ` [\`친구들의 이름\`]\n`;
-                str += `\`\`\`일정한 확률로 문구가 출력되기도 합니다.\`\`\`\n`;
-
-                Ch.action.list.forEach(Command => {
-                    if (Command.desc === undefined)
-                        return;
-
-                    str += `**${Command.name}**`;
-                    str += ` [\`${Command.subnames.join(', ')}\`]\n`;
-                    str += `\`\`\`${Command.desc}\`\`\`\n`;
-                })
-
-                str += `\n*\`P.S. 아무거나 입력하면 사라집니다. (<도움말> 명령어를 입력하면 고정)\`*`;
-
-                Ch.history.list[0].channel.send(str)
-                    .then(MessageObject => Ch.history.add(MessageObject))
-                    .then(() => {
-                        Ch.Client.once('message', MessageObject => {
-                            if (!Command.condition.check(MessageObject)) {
-                                Ch.history.list[1].delete();
-                            }
-                        });
-                    });  
-            }
-        }, true, false);
+        this.proceeding = false;
 
         // Binding
-            this.startMessage = this.startMessage.bind(this);
+        this.findCommand  = this.findCommand.bind(this);
+        this.callCommand  = this.callCommand.bind(this);
+        this.startCommand = this.startCommand.bind(this);
+        this.endCommand   = this.endCommand.bind(this);
+
+        this._main_MessageListener  = this._main_MessageListener.bind(this);
+        this._assignCommandPackages = this._assignCommandPackages.bind(this);
+        this._onCommandStart = this._onCommandStart.bind(this);
+        this._onCommandEnd   = this._onCommandEnd.bind(this);
+
+        // Init
+        this._assignCommandPackages('friend', 'music', 'help');
+
         // Listener
-        this.Client.on('message', this.startMessage);
-    }    
-
-    startMessage(MessageObject) {
-        if (this.Client.user.presence.status != 'online')
-            return;
-
-        this.onMessage(MessageObject);
-
+        this.client.on('message', this._main_MessageListener);
+        this.eventEmitter.on('commandStart', this._onCommandStart);
+        this.eventEmitter.on('commandEnd',   this._onCommandEnd);
     }
+
+    get lastMessage() {
+        return this.history.list[0];
+    }
+
+
+    // Methods
+    send(text) {
+        if (!this.lastMessage) throw `No history`;
+
+        return this.lastMessage.channel.send(text)
+                   .then(Message => {
+                       this.history.add(Message);
+                       return Message;
+                    });
+    }
+
+    findCommand(Message) {
+        if (typeof Message === 'string')
+            return this.commandList.find(item => item.name === Message);
+
+        return this.commandList.find(item => item.isThis(Message));
+    }
+
+    callCommand(name) {
+        this.eventEmitter.emit(`command:${name}`, this);
+    }
+
+    startCommand() {
+        this.eventEmitter.emit('commandStart');
+    }
+
+    endCommand() {
+        this.eventEmitter.emit('commandEnd');
+    }
+
+
+    // Helpers
+    _assignCommandPackages() {
+        Array.from(arguments).forEach(packname => {
+            let cmdPackage = require(`../cmd/${packname}.js`);
+
+            cmdPackage.forEach(c => {
+                this.eventEmitter.on(`command:${c.name}`, c.action);
+            });
+            this.commandList = this.commandList.concat(cmdPackage);
+        });
+    }
+
+    _main_MessageListener(Message) {
+        console.log('onMessage');
+        this.history.add(Message);
+        
+        let Command = this.findCommand(Message);
+        if (Command && !this.proceeding) {
+            console.log(`Command called (${Command.name})`);
+            this.callCommand(Command.name);
+        }
+    }
+
+
+    // Command Handling
+
+    _onCommandStart(text = '') {
+        console.log('Command Started!', text);
+        this.client.user.setStatus('idle');
+        this.proceeding = true;
+    }
+
+    _onCommandEnd(text = '') {
+        console.log('Command Ended!', text);
+        this.client.user.setStatus('online');
+        this.proceeding = false;
+    }
+
+
+    // History Handling
+    _addHistory(Message) {
+        this.list.unshift(Message);
+
+        if (this.list.length > 10)
+            this.list.pop();
+    }
+    
+    _clearHistory() { this.list = []; }
 }
 
 module.exports = MessageHandler;
