@@ -52,7 +52,10 @@ applyOptions(newOption) {
     if (!Array.isArray(subnames)) throw `Error : subnames is not Array`;
 
     newOption.condition = {
-        onCommand : condition.onCommand || true,
+        onCommand : (condition.onCommand === undefined) ?
+                        true :
+                        condition.onCommand,
+
         onChat    : condition.onChat    || false,
         onBot     : condition.onBot     || false
     };
