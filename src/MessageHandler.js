@@ -15,14 +15,18 @@ class MessageHandler {
         this.proceeding = false;
 
         // Binding
+        this.findCommand  = this.findCommand.bind(this);
+        this.callCommand  = this.callCommand.bind(this);
+        this.startCommand = this.startCommand.bind(this);
+        this.endCommand   = this.endCommand.bind(this);
+
         this._main_MessageListener  = this._main_MessageListener.bind(this);
         this._assignCommandPackages = this._assignCommandPackages.bind(this);
         this._onCommandStart = this._onCommandStart.bind(this);
         this._onCommandEnd   = this._onCommandEnd.bind(this);
-        this._findCommand    = this._findCommand.bind(this);
 
         // Init
-        this._assignCommandPackages('help', 'friend');
+        this._assignCommandPackages('friend', 'music', 'help');
 
         // Listener
         this.client.on('message', this._main_MessageListener);
@@ -30,12 +34,41 @@ class MessageHandler {
         this.eventEmitter.on('commandEnd',   this._onCommandEnd);
     }
 
+    get lastMessage() {
+        return this.history.list[0];
+    }
+
+
     // Methods
     send(text) {
-        if (!this.history.list[0]) throw `No history`;
+        if (!this.lastMessage) throw `No history`;
 
-        return this.history.list[0].channel.send(text);
+        return this.lastMessage.channel.send(text)
+                   .then(Message => {
+                       this.history.add(Message);
+                       return Message;
+                    });
     }
+
+    findCommand(Message) {
+        if (typeof Message === 'string')
+            return this.commandList.find(item => item.name === Message);
+
+        return this.commandList.find(item => item.isThis(Message));
+    }
+
+    callCommand(name) {
+        this.eventEmitter.emit(`command:${name}`, this);
+    }
+
+    startCommand() {
+        this.eventEmitter.emit('commandStart');
+    }
+
+    endCommand() {
+        this.eventEmitter.emit('commandEnd');
+    }
+
 
     // Helpers
     _assignCommandPackages() {
@@ -53,29 +86,28 @@ class MessageHandler {
         console.log('onMessage');
         this.history.add(Message);
         
-        let Command = this._findCommand(Message);
+        let Command = this.findCommand(Message);
         if (Command && !this.proceeding) {
-            this.eventEmitter.emit(`command:${Command.name}`, this);
+            console.log(`Command called (${Command.name})`);
+            this.callCommand(Command.name);
         }
     }
 
+
     // Command Handling
 
-    _findCommand(Message) {
-        return this.commandList.find(item => item.isThis(Message));
-    }
-
-    _onCommandStart() {
-        console.log('Command Started!');
+    _onCommandStart(text = '') {
+        console.log('Command Started!', text);
         this.client.user.setStatus('idle');
         this.proceeding = true;
     }
 
-    _onCommandEnd() {
-        console.log('Command Ended!');
+    _onCommandEnd(text = '') {
+        console.log('Command Ended!', text);
         this.client.user.setStatus('online');
         this.proceeding = false;
     }
+
 
     // History Handling
     _addHistory(Message) {
