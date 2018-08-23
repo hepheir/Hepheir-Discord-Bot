@@ -1,2 +1,2 @@
-data/api_key.json
-./data/api_key.json
+bot/common/api/bot.json
+bot/common/api/youtube.json
