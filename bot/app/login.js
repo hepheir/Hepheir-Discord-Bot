@@ -8,6 +8,13 @@ const bot_path = '../common/api/bot.json';
 const fs = require('fs');
 const Discord = require('discord.js');
 
+
+function parseJsonFile(path) {
+    let file = fs.readFileSync(path);
+    return JSON.parse(file);
+}
+
+
 const client = new Discord.Client();
 
 const BOT = parseJsonFile(bot_path);
@@ -30,8 +37,3 @@ You can invite [${client.user.tag}] on this url.
 });
 
 module.exports = client;
-
-function parseJsonFile(path) {
-    let file = fs.readFileSync(path);
-    return JSON.parse(file);
-}
