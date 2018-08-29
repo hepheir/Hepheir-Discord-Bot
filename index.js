@@ -6,7 +6,7 @@
 
 ///////////////////////////////////////
 
-const API_Bot_Path = '../common/api/bot.json';
+const API_Bot_Path = 'bot/common/api/bot.json';
 
 ///////////////////////////////////////
 
@@ -30,7 +30,7 @@ function __main__() {
     clientLogin();
 
     client.once('ready', () => {
-        //
+        console.log(`I'm ready!`);
     });
 }
 
