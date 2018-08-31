@@ -35,6 +35,8 @@ var commandToolKit = {
     findCommand : findCommand,
     callCommand : callCommand,
 
+    endCommand : endCommand,
+    
     API_Path : API_Path
 };
 
@@ -98,6 +100,10 @@ function findCommand(Message) {
 function callCommand(name) {
     eventEmitter.emit(`CommandStart`);
     eventEmitter.emit(`Command:${name}`, commandToolKit);
+}
+
+function endCommand() {
+    eventEmitter.emit(`CommandEnd`);
 }
 
 
