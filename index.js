@@ -6,7 +6,10 @@
 
 ///////////////////////////////////////
 
-const API_Bot_Path = 'bot/common/api/bot.json';
+const API_Path = {
+    Bot : 'bot/common/api/bot.json',
+    Youtube : 'bot/common/api/youtube.json'
+};
 
 ///////////////////////////////////////
 
@@ -20,24 +23,48 @@ const eventEmitter = new events.EventEmitter();
 
 ///////////////////////////////////////
 
-var Brains = {
-    //
+var CommandList = [];
+
+// commandToolKit will be passed to the
+// command actions to support their features.
+var commandToolKit = {
+    client : client,
+    eventEmitter : eventEmitter,
+
+    readJsonFile : readJsonFile,
+    findCommand : findCommand,
+    callCommand : callCommand,
+
+    API_Path : API_Path
 };
 
 ///////////////////////////////////////
 
 function __main__() {
-    clientLogin();
+    client.once('ready', addMessageListener);
 
-    client.once('ready', () => {
-        console.log(`I'm ready!`);
-    });
+    client.on(`CommandStart`, removeMessageListener);
+    client.on(`CommandEnd`, addMessageListener);
+
+    clientLogin();
+    console.log(commandToolKit);
+}
+
+function __messageListener__(Message) {
+    if (!msg.guild)
+        return;
+
+    let Command = findCommand(Message);
+    if (!Command)
+        return;
+
+    callCommand(Command.name);
 }
 
 ///////////////////////////////////////
 
 function clientLogin() {
-    let BOT = readJsonFile(API_Bot_Path);
+    let BOT = readJsonFile(API_Path.Bot);
     if (!BOT.token) throw `
 Error! Could not login because the token was not given!
 please enter your token @ [bot/common/api/bot.json]`;
@@ -55,9 +82,24 @@ You can invite [${client.user.tag}] on this url.
 }
 
 
-function __commandRegistry__() {
-
+function addMessageListener() {
+    client.on('message', __messageListener__);
 }
+
+function removeMessageListener() {
+    client.removeListener('message', __messageListener__);
+}
+
+
+function findCommand(Message) {
+    return CommandList.find(cmd => cmd.checkCondition(Message));
+}
+
+function callCommand(name) {
+    eventEmitter.emit(`CommandStart`);
+    eventEmitter.emit(`Command:${name}`, commandToolKit);
+}
+
 
 ///////////////////////////////////////
 
