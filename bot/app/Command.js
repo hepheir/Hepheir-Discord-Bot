@@ -10,15 +10,37 @@ class Command {
         this.action = action;
         this.option = setDefaultOpt(option);
 
-        this.call = this.call.bind(this);
+        this.checkCondition = this.checkCondition.bind(this);
     }
 
-    call() {
-        this.action();
+    checkCondition(Message) {
+        let name = this.name;
+        let subnames = this.option.subnames;
+        let { onCommand, onChat, onBot } = this.option.condition;
+
+        let text = Message.content;
+    
+        let isBot = Message.author.bot;
+        if (!onBot && isBot )
+            return false;
+    
+        let calledByName    = text.includes(name);
+        let calledBySubname = subnames.find(sn => text.includes(sn));
+        if ( onChat && ( calledByName || calledBySubname ) )
+            return true;
+        
+        let commandCalled = text.startsWith(name) ||
+                            subnames.find(sn => text.startsWith(sn));
+        if ( onCommand && commandCalled )
+            return true;
+    
+        return false;
     }
 }
 
 module.exports = Command;
+
+///////////////////////////////////////
 
 function checkValidProp(name, action, option) {
     if (!name)
@@ -71,4 +93,4 @@ function setDefaultOpt(option) {
     option.condition = condition;
 
     return option;
-}
+} 
