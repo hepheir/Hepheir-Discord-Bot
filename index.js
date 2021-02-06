@@ -1,10 +1,7 @@
-const fs = require('fs');
-const yaml = require('js-yaml');
+const config = require('./config.json');
 
 const Discord = require('discord.js');
 const client = new Discord.Client();
-
-const config = yaml.load(fs.readFileSync('config.yml'));
 
 client.on('ready', () => {
     console.log(`Logged in as "${client.user.tag}"!`);
