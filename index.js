@@ -36,6 +36,7 @@ client.on('message', message => {
         return message.reply(reply);
     }
 
+    // Cooldowns for commands
     if (!client.cooldowns.has(command.name)) {
         client.cooldowns.set(command.name, new Discord.Collection());
     }
@@ -49,7 +50,8 @@ client.on('message', message => {
 
         if (now < expirationTime) {
             const timeLeft = (expirationTime - now) / 1000;
-            return message.reply(`\`${command.name}\` 명령을 사용하려면 ${timeLeft.toFixed(1)}초 더 기다려야 합니다.`)
+            message.author.send(`\`${command.name}\` 명령을 사용하려면 ${timeLeft.toFixed(1)}초 더 기다려야 합니다.`);
+            return;
         }
     }
     timestamps.set(message.author.id, now);
