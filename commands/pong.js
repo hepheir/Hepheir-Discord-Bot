@@ -1,10 +1,10 @@
 module.exports = {
-    name: 'ping',
-    description: 'Ping!',
+    name: 'pong',
+    description: 'Pong!',
     usage: '',
     args: false,
     guildOnly: false,
     execute(message, args) {
-        message.reply('Pong.');
+        message.reply('Ping.');
     },
 };
