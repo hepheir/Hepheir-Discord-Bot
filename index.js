@@ -32,6 +32,11 @@ client.on('message', message => {
         }
         return message.reply(reply);
     }
+    // If guild-only command
+    if (command.guildOnly && !message.channel.type === 'dm') {
+        return message.reply(`이 명령은 서버에서만 사용 가능합니다!`);
+    }
+
     // Execute command
     try {
         command.execute(message, args);
