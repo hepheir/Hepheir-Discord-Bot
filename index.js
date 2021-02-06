@@ -60,6 +60,11 @@ client.on('message', message => {
         return message.reply(`이 명령은 서버에서만 사용 가능합니다!`);
     }
 
+    // Adds reaction to the command
+    if (command.reaction) {
+        message.react(command.reaction);
+    }
+
     // Execute command
     try {
         command.execute(message, args);
