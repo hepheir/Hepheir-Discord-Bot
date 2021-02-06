@@ -14,18 +14,20 @@ for (const file of commandFiles) {
     client.commands.set(command.name, command);
 }
 
-// Parses messages
 client.on('message', message => {
+    // Parses messages
     if (!message.content.startsWith(prefix) || message.author.bot) return;
 
     const args = message.content.slice(prefix.length).trim().split(/ +/);
     const commandName = args.shift().toLowerCase();
 
-    if (!client.commands.has(commandName)) return;
+    const command = client.commands.get(commandName) || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 
-    const command = client.commands.get(commandName)
-        || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
-    console.log(`${message.author.username}님이 \`${command.name}\`명령을 호출하였습니다.`);
+    if (!command) return;
+
+    // Make a log history
+    const now = Date.now();
+    console.log(`[${new Date(now).toISOString()}] ${message.author.username}님이 "${commandName}"로 \`${command.name}\`명령을 호출하였습니다.`);
 
     // If arguments are insufficient
     if (command.args && !args.length) {
@@ -41,7 +43,6 @@ client.on('message', message => {
         client.cooldowns.set(command.name, new Discord.Collection());
     }
 
-    const now = Date.now();
     const timestamps = client.cooldowns.get(command.name);
     const cooldownAmount = (command.cooldown || cooldown) * 1000;
 
