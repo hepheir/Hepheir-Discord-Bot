@@ -23,6 +23,15 @@ client.on('message', message => {
     if (!client.commands.has(commandName)) return;
 
     const command = client.commands.get(commandName);
+
+    // If arguments are insufficient
+    if (command.args && !args.length) {
+        let reply = `명령이 완전하지 않습니다!`;
+        if (command.usage) {
+            reply += `\n이 명령의 올바른 사용방법은 다음과 같습니다: \`${prefix}${command.name} ${command.usage}\``;
+        }
+        return message.reply(reply);
+    }
     // Execute command
     try {
         command.execute(message, args);
