@@ -1,9 +1,10 @@
 const fs = require('fs');
 const Discord = require('discord.js');
-const { prefix, token } = require('./config.json');
+const { prefix, cooldown, token } = require('./config.json');
 
 const client = new Discord.Client();
 client.commands = new Discord.Collection();
+client.cooldowns = new Discord.Collection();
 
 // Loads commands from './commands'
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
@@ -32,6 +33,26 @@ client.on('message', message => {
         }
         return message.reply(reply);
     }
+
+    if (!cooldowns.has(command.name)) {
+        cooldowns.set(command.name, new Discord.Collection());
+    }
+
+    const now = Date.now();
+    const timestamps = cooldowns.get(command.name);
+    const cooldownAmount = (command.cooldown || cooldown) * 1000;
+
+    if (timestamps.has(message.author.id)) {
+        const expirationTime = timestamps.get(message.author.id) + cooldownAmount;
+
+        if (now < expirationTime) {
+            const timeLeft = (expirationTime - now) / 1000;
+            return message.reply(`\`${command.name}\` 명령을 사용하려면 ${timeLeft.toFixed(1)}초 더 기다려야 합니다.`)
+        }
+    }
+    timestamps.set(message.author.id, now);
+    setTimeout(() => timestamps.delete(message.author.id), cooldownAmount);
+
     // If guild-only command
     if (command.guildOnly && !message.channel.type === 'dm') {
         return message.reply(`이 명령은 서버에서만 사용 가능합니다!`);
