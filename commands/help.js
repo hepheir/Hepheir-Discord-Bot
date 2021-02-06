@@ -1,10 +1,9 @@
 module.exports = {
     name: 'help',
-    description: 'Help',
+    description: '사용법을 안내해 드립니다.',
     aliases: ['commands', '도움', '도와줘', '헬프', '헲'],
-    args: false,
     usage: '[command name]',
-    cooldown: 3,
+    args: false,
     guildOnly: false,
     execute(message, args) {
         const data = [];

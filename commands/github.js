@@ -2,9 +2,8 @@ module.exports = {
     name: 'github',
     description: 'Hepheir-Discord-Bot의 GitHub 관련 정보',
     aliases: ['git', 'repo', 'contribution', '깃허브', '깃헙', '깃', '레포', '레포지토리', 'update', '업데이트', '업뎃'],
-    args: false,
     usage: '',
-    cooldown: 3,
+    args: false,
     guildOnly: false,
     execute(message, args) {
         const data = [
