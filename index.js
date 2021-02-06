@@ -14,16 +14,20 @@ for (const file of commandFiles) {
     client.commands.set(command.name, command);
 }
 
-// Parses messages
 client.on('message', message => {
+    // Parses messages
     if (!message.content.startsWith(prefix) || message.author.bot) return;
 
     const args = message.content.slice(prefix.length).trim().split(/ +/);
     const commandName = args.shift().toLowerCase();
 
-    if (!client.commands.has(commandName)) return;
+    const command = client.commands.get(commandName) || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 
-    const command = client.commands.get(commandName);
+    if (!command) return;
+
+    // Make a log history
+    const now = Date.now();
+    console.log(`[${new Date(now).toISOString()}] ${message.author.username}님이 "${commandName}"로 \`${command.name}\`명령을 호출하였습니다.`);
 
     // If arguments are insufficient
     if (command.args && !args.length) {
@@ -34,11 +38,11 @@ client.on('message', message => {
         return message.reply(reply);
     }
 
+    // Cooldowns for commands
     if (!client.cooldowns.has(command.name)) {
         client.cooldowns.set(command.name, new Discord.Collection());
     }
 
-    const now = Date.now();
     const timestamps = client.cooldowns.get(command.name);
     const cooldownAmount = (command.cooldown || cooldown) * 1000;
 
@@ -47,7 +51,8 @@ client.on('message', message => {
 
         if (now < expirationTime) {
             const timeLeft = (expirationTime - now) / 1000;
-            return message.reply(`\`${command.name}\` 명령을 사용하려면 ${timeLeft.toFixed(1)}초 더 기다려야 합니다.`)
+            message.author.send(`\`${command.name}\` 명령을 사용하려면 ${timeLeft.toFixed(1)}초 더 기다려야 합니다.`);
+            return;
         }
     }
     timestamps.set(message.author.id, now);
@@ -56,6 +61,11 @@ client.on('message', message => {
     // If guild-only command
     if (command.guildOnly && !message.channel.type === 'dm') {
         return message.reply(`이 명령은 서버에서만 사용 가능합니다!`);
+    }
+
+    // Adds reaction to the command
+    if (command.reaction) {
+        message.react(command.reaction);
     }
 
     // Execute command

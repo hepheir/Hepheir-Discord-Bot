@@ -1,11 +1,20 @@
 module.exports = {
     name: 'ping',
     description: 'Ping!',
+    aliases: ['pong'],
     args: false,
-    usage: 'ping',
-    cooldown: 5,
+    usage: '',
+    cooldown: 3,
     guildOnly: false,
     execute(message, args) {
-        message.reply('Pong.');
+        switch (message.content.toLower()) {
+            case 'pong':
+                message.reply('Ping.');
+                break;
+
+            default:
+                message.reply('Pong.');
+                break
+        }
     },
 };
