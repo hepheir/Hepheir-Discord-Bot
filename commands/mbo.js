@@ -1,12 +1,12 @@
 module.exports = {
-    name: 'rghb',
-    description: '라고할뻔 ㅋㅋ! 를 달아드립니다. 명령어 뒤에 \'크게\'를 붙이면 더 커집니다.',
-    aliases: ['라고할뻔', 'ㄺㅎㅃ', 'ㄹㄱㅎㅃ', '라고할뻔!', '라고할뻔ㅋㅋ', '라고할뻔ㅋㅋ!'],
+    name: 'mbo',
+    description: '민뱅온을 달아드립니다. 명령어 뒤에 \'크게\'를 붙이면 더 커집니다.',
+    aliases: ['민뱅온', 'ㅁㅂㅇ', '김민호', '민호', '마이노', 'mino', 'ㅁㅇㄴ'],
     usage: "['크게', 'big', 'large', '짱크게', '짱커', '짱']",
     args: false,
     guildOnly: false,
     execute(message, args) {
-        const reaction = '<a:ko_RGHB:806550357731442731>';
+        const reaction = '<a:ko_MBO:806550357823848448>';
         const arguments = ['크게', 'big', 'large', '짱크게', '짱커', '짱'];
         
         if (args.length && arguments.includes(args[0])) {

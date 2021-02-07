@@ -1,7 +1,7 @@
 module.exports = {
     name: 'nibbong',
     description: '니뽕 내뽕!',
-    aliases: ['니뽕내뽕', '맵크뽕', 'ㅁㅋㅃ', 'ㄴㅃㄴㅃ', '뽕크맵'],
+    aliases: ['니뽕내뽕', '맵크뽕', 'ㅁㅋㅃ', 'ㄴㅃㄴㅃ', '뽕크맵', '니뽕', '내뽕', '로뽕', '크뽕', '일저맵'],
     usage: '',
     cooldown: 3,
     args: false,
