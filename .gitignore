@@ -1,4 +1,6 @@
-data/api_key.json
-./data/api_key.json
-
+# Node.js project settings
 node_modules
+package-lock.json
+
+# For security issue
+config.json
